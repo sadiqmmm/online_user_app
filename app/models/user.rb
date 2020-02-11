@@ -4,5 +4,10 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
   
-  scope :online, ->{ where("last_seen_at > ?", 15.minutes.ago) }       
+  #scope :online, ->{ where("last_seen_at > ?", 15.minutes.ago) }
+  
+  def self.online
+    ids = ActionCable.server.pubsub.redis_connection_for_subscriptions.smembers "online"
+    where(id: ids)
+  end
 end
